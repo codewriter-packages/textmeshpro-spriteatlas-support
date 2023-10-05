@@ -12,26 +12,29 @@
 
 #### 1. Enable SpriteAtlas V2 in `ProjectSettings/Editor`
 
-![SpriteAtlasV2](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/dbbfcd48-0962-4614-8185-d049464d3324)
+![SpriteAtlasV2](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/70ca19c5-907e-4843-99e0-eafaa6f9e2cb)
 
 #### 2. Create `SpriteAtlas`
 
-![SpriteAtlas](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/0fcce501-46ce-4262-a189-6c1326d257e0)
+![SpriteAtlas](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/c381651c-c32d-4917-a59a-1d1f5762a9fb)
 
 #### 3. Select `SpriteAtlas` and create asset by `Create/TextMeshPro/SpriteAtlas Asset`
 
-![SpriteAtlas Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/2b50538c-453c-4031-aca7-e76c71b20f68)
+![SpriteAtlas Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/23a6cf75-2559-484e-b8df-2a107da98a63)
 
 #### 4. Update generated assets with `UpdateSprites` context menu
 
-![UpdateSprites](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/1b928fcf-5334-4d3b-861a-2060bde7390a)
+![UpdateSprites](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/4b75f34f-e372-46e5-b8b2-8bf02b19a39b)
 
 > [!IMPORTANT]  
-> SpriteAtlas Asset can be updates only in  play mode due to limitatiion of Unity
+> SpriteAtlas Asset can be updates only in  play mode due to limitation of Unity
+
+> [!IMPORTANT]  
+> SpriteAtlas Asset must be updated manually every time source SpriteAtlas is modified
 
 #### 5. Done. Now you can use generated sprite asset in TextMeshPro
 
-![Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/e1deb105-ee74-4c00-a2bb-cd5901e30495)
+![Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/a8fb3845-20f8-4f45-843a-047a0dcc8fea)
 
 ## :open_book: How to Install
 
