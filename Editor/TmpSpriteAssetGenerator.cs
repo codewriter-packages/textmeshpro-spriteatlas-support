@@ -1,43 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.AssetImporters;
 using UnityEngine;
 using UnityEngine.TextCore;
+using UnityEngine.U2D;
+using SpriteUtility = UnityEditor.Sprites.SpriteUtility;
 
 namespace TMPro
 {
     public static class TmpSpriteAssetGenerator
     {
-        public static void Update(TmpSpriteAtlasAsset rootAsset, bool updateSprites = true)
+        public static void Generate(AssetImportContext ctx,
+            TMP_SpriteAsset mainSpriteAsset, SpriteAtlas atlas, TmpSpriteAssetData data)
         {
-            var rootAssetPath = AssetDatabase.GetAssetPath(rootAsset);
-
-            AddMainSpriteAsset(rootAsset);
-
-            if (updateSprites)
-            {
-                UpdateSpriteAssets(rootAsset);
-            }
-
-            EditorUtility.SetDirty(rootAsset);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.ImportAsset(rootAssetPath);
-
-            foreach (var spriteAsset in AssetDatabase.LoadAllAssetsAtPath(rootAssetPath).OfType<TMP_SpriteAsset>())
-            {
-                TMPro_EventManager.ON_SPRITE_ASSET_PROPERTY_CHANGED(true, spriteAsset);
-            }
-        }
-
-        private static void UpdateSpriteAssets(TmpSpriteAtlasAsset rootAsset)
-        {
-            var rootAssetPath = AssetDatabase.GetAssetPath(rootAsset);
-            var spriteAtlasPath = AssetDatabase.GetAssetPath(rootAsset.spriteAtlas);
-
-            var subSpriteAssets = AssetDatabase.LoadAllAssetsAtPath(rootAssetPath)
-                .OfType<TMP_SpriteAsset>()
-                .Where(it => it != rootAsset.mainSpriteAsset)
-                .ToList();
+            var spriteAtlasPath = AssetDatabase.GetAssetPath(atlas);
 
             var atlasTextures = AssetDatabase.LoadAllAssetsAtPath(spriteAtlasPath)
                 .OfType<Texture2D>()
@@ -45,23 +22,19 @@ namespace TMPro
 
             foreach (var atlasTex in atlasTextures)
             {
-                var spriteAsset = subSpriteAssets.FirstOrDefault(it => it.name == atlasTex.name);
-                if (spriteAsset == null)
-                {
-                    spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
-                    AssetDatabase.AddObjectToAsset(spriteAsset, rootAsset);
-                }
+                var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
+                ctx.AddObjectToAsset(atlasTex.name, spriteAsset);
 
                 spriteAsset.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
                 spriteAsset.name = atlasTex.name;
                 spriteAsset.version = "1.1.0";
                 spriteAsset.spriteSheet = atlasTex;
-                spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(rootAsset.spriteAtlas.name);
+                spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(atlasTex.name);
 
                 var spriteGlyphTable = new List<TMP_SpriteGlyph>();
                 var spriteCharacterTable = new List<TMP_SpriteCharacter>();
 
-                PopulateSpriteTables(rootAsset, atlasTex, spriteCharacterTable, spriteGlyphTable);
+                PopulateSpriteTables(ctx, atlas, data, atlasTex, spriteCharacterTable, spriteGlyphTable);
 
                 spriteAsset.spriteCharacterTable = spriteCharacterTable;
                 spriteAsset.spriteGlyphTable = spriteGlyphTable;
@@ -71,87 +44,81 @@ namespace TMPro
 
                 if (spriteAsset.material == null)
                 {
-                    AddDefaultMaterial(spriteAsset);
+                    AddDefaultMaterial(ctx, spriteAsset);
                 }
 
-                rootAsset.mainSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
+                mainSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
             }
-
-            foreach (var spriteAsset in subSpriteAssets)
-            {
-                if (atlasTextures.FirstOrDefault(it => it.name == spriteAsset.name) != null)
-                {
-                    continue;
-                }
-
-                if (spriteAsset.material != null)
-                {
-                    Object.DestroyImmediate(spriteAsset.material, allowDestroyingAssets: true);
-                }
-
-                Object.DestroyImmediate(spriteAsset, allowDestroyingAssets: true);
-            }
-        }
-
-        private static void AddMainSpriteAsset(TmpSpriteAtlasAsset rootAsset)
-        {
-            var mainSpriteAsset = rootAsset.mainSpriteAsset;
-
-            if (mainSpriteAsset == null)
-            {
-                mainSpriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
-                AssetDatabase.AddObjectToAsset(mainSpriteAsset, rootAsset);
-
-                rootAsset.mainSpriteAsset = mainSpriteAsset;
-            }
-
-            mainSpriteAsset.name = rootAsset.spriteAtlas.name;
-            mainSpriteAsset.hideFlags = HideFlags.NotEditable;
-            mainSpriteAsset.fallbackSpriteAssets = new List<TMP_SpriteAsset>();
         }
 
         private static void PopulateSpriteTables(
-            TmpSpriteAtlasAsset rootAsset,
+            AssetImportContext ctx,
+            SpriteAtlas atlas,
+            TmpSpriteAssetData data,
             Texture2D texture,
             List<TMP_SpriteCharacter> spriteCharacterTable,
             List<TMP_SpriteGlyph> spriteGlyphTable)
         {
-            var spriteCount = rootAsset.spriteAtlas.spriteCount;
-            var sprites = new Sprite[spriteCount];
-
-            rootAsset.spriteAtlas.GetSprites(sprites);
+            var spritesCount = atlas.spriteCount;
+            var sprites = new Sprite[spritesCount];
+            atlas.GetSprites(sprites);
 
             for (var i = 0; i < sprites.Length; i++)
             {
-                var sprite = sprites[i];
+                var spriteAccess = sprites[i];
 
-                if (sprite.texture != texture)
+                Texture2D spriteTex;
+                Vector2[] spriteUv;
+
+                try
+                {
+                    spriteTex = SpriteUtility.GetSpriteTexture(spriteAccess, getAtlasData: true);
+                    spriteUv = SpriteUtility.GetSpriteUVs(spriteAccess, getAtlasData: true);
+                }
+                catch
+                {
+                    // for non-packed sprites SpriteUtility throws exception
+                    // this only happens when the atlas is not baked e.g.
+                    // when new assets were added
+                    // after atlas re-baking this function works as it should again
+
+                    spriteTex = null;
+                    spriteUv = null;
+
+                    ctx.LogImportError($"Failed to process '{spriteAccess.name}' sprite because it is not packed");
+                }
+
+                if (spriteTex == null || spriteUv == null || spriteTex != texture)
                 {
                     continue;
                 }
 
-                var spriteName = sprite.name;
+                var spriteName = spriteAccess.name;
 
                 if (spriteName.EndsWith("(Clone)"))
                 {
                     spriteName = spriteName.Substring(0, spriteName.Length - "(Clone)".Length);
                 }
 
-                var bearing = rootAsset.bearing;
-                var advance = rootAsset.advance;
+                var textureRect = new Rect(
+                    x: spriteUv[0].x * spriteTex.width,
+                    y: spriteUv[2].y * spriteTex.height,
+                    width: (spriteUv[1].x - spriteUv[0].x) * spriteTex.width,
+                    height: (spriteUv[1].y - spriteUv[2].y) * spriteTex.height
+                );
 
                 var spriteGlyph = new TMP_SpriteGlyph
                 {
                     index = (uint) i,
                     metrics = new GlyphMetrics(
-                        width: sprite.textureRect.width,
-                        height: sprite.textureRect.height,
-                        bearingX: bearing.x,
-                        bearingY: sprite.textureRect.height - bearing.y,
-                        advance: sprite.textureRect.width + advance),
-                    glyphRect = new GlyphRect(sprite.textureRect),
+                        width: textureRect.width,
+                        height: textureRect.height,
+                        bearingX: data.bearingX,
+                        bearingY: textureRect.height - data.bearingY,
+                        advance: textureRect.width + data.advance),
+                    glyphRect = new GlyphRect(textureRect),
                     scale = 1.0f,
-                    sprite = sprite,
+                    sprite = spriteAccess,
                 };
 
                 spriteGlyphTable.Add(spriteGlyph);
@@ -159,22 +126,24 @@ namespace TMPro
                 var spriteCharacter = new TMP_SpriteCharacter(0xFFFE, spriteGlyph)
                 {
                     name = spriteName,
-                    scale = rootAsset.scale,
+                    scale = data.scale,
                 };
 
                 spriteCharacterTable.Add(spriteCharacter);
             }
         }
 
-        private static void AddDefaultMaterial(TMP_SpriteAsset spriteAsset)
+        private static void AddDefaultMaterial(AssetImportContext ctx, TMP_SpriteAsset spriteAsset)
         {
+            var name = $"{spriteAsset.spriteSheet.name} Material";
             var shader = Shader.Find("TextMeshPro/Sprite");
             var material = new Material(shader);
             material.SetTexture(ShaderUtilities.ID_MainTex, spriteAsset.spriteSheet);
 
             spriteAsset.material = material;
+            material.name = name;
             material.hideFlags = HideFlags.HideInHierarchy | HideFlags.NotEditable;
-            AssetDatabase.AddObjectToAsset(material, spriteAsset);
+            ctx.AddObjectToAsset(name, material);
         }
     }
 }

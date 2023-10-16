@@ -7,33 +7,6 @@ namespace TMPro
 {
     public static class TmpSpriteAssetMenu
     {
-        [MenuItem("CONTEXT/TmpSpriteAtlasAsset/Update Sprites", true, 2200)]
-        private static bool UpdateValidate(MenuCommand command)
-        {
-            return command.context is TmpSpriteAtlasAsset;
-        }
-
-        [MenuItem("CONTEXT/TmpSpriteAtlasAsset/Update Sprites", false, 2200)]
-        private static void Update(MenuCommand command)
-        {
-            if (!Application.isPlaying)
-            {
-                Debug.LogError("TmpSpriteAtlasAsset can be updates only in play mode");
-                return;
-            }
-
-            if (EditorSettings.spritePackerMode != SpritePackerMode.SpriteAtlasV2)
-            {
-                Debug.LogError("TmpSpriteAtlasAsset can be updates only when spritePackerMode is SpriteAtlasV2");
-                return;
-            }
-
-            if (command.context is TmpSpriteAtlasAsset rootAsset)
-            {
-                TmpSpriteAssetGenerator.Update(rootAsset);
-            }
-        }
-
         [MenuItem("Assets/Create/TextMeshPro/SpriteAtlas Asset", true, 2200)]
         private static bool PackValidate()
         {
@@ -44,18 +17,19 @@ namespace TMPro
         private static void Pack()
         {
             var spriteAtlas = (SpriteAtlas) Selection.activeObject;
+            var spriteAtlasPath = AssetDatabase.GetAssetPath(spriteAtlas);
+            var spriteAtlasGuid = AssetDatabase.AssetPathToGUID(spriteAtlasPath);
+
             var rootAssetPath = GetSpriteAtlasPathFromSpriteAtlas(spriteAtlas);
 
-            var rootAsset = AssetDatabase.LoadAssetAtPath<TmpSpriteAtlasAsset>(rootAssetPath);
-            if (rootAsset == null)
+            var data = new TmpSpriteAssetData
             {
-                rootAsset = ScriptableObject.CreateInstance<TmpSpriteAtlasAsset>();
-                AssetDatabase.CreateAsset(rootAsset, rootAssetPath);
-            }
+                atlasGuid = spriteAtlasGuid,
+            };
 
-            rootAsset.spriteAtlas = spriteAtlas;
+            File.WriteAllText(rootAssetPath, JsonUtility.ToJson(data));
 
-            TmpSpriteAssetGenerator.Update(rootAsset, updateSprites: false);
+            AssetDatabase.ImportAsset(rootAssetPath, ImportAssetOptions.ForceUpdate);
         }
 
         private static string GetSpriteAtlasPathFromSpriteAtlas(SpriteAtlas spriteAtlas)
@@ -64,7 +38,7 @@ namespace TMPro
             var fileNameWithExtension = Path.GetFileName(filePathWithName);
             var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePathWithName);
             var filePath = filePathWithName.Replace(fileNameWithExtension, "");
-            return filePath + fileNameWithoutExtension + ".asset";
+            return filePath + fileNameWithoutExtension + TmpSpriteAssetImporter.FileExtensionWithDot;
         }
     }
 }
