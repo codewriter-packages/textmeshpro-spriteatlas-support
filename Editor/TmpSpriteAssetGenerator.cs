@@ -100,11 +100,20 @@ namespace TMPro
                     spriteName = spriteName.Substring(0, spriteName.Length - "(Clone)".Length);
                 }
 
+                var boundMin = spriteUv[0];
+                var boundMax = spriteUv[0];
+
+                foreach (var uv in spriteUv)
+                {
+                    boundMin = Vector2.Min(boundMin, uv);
+                    boundMax = Vector2.Max(boundMax, uv);
+                }
+
                 var textureRect = new Rect(
-                    x: spriteUv[0].x * spriteTex.width,
-                    y: spriteUv[2].y * spriteTex.height,
-                    width: (spriteUv[1].x - spriteUv[0].x) * spriteTex.width,
-                    height: (spriteUv[1].y - spriteUv[2].y) * spriteTex.height
+                    x: boundMin.x * spriteTex.width,
+                    y: boundMin.y * spriteTex.height,
+                    width: (boundMax.x - boundMin.x) * spriteTex.width,
+                    height: (boundMax.y - boundMin.y) * spriteTex.height
                 );
 
                 var spriteGlyph = new TMP_SpriteGlyph
