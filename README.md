@@ -23,11 +23,9 @@
 
 #### 3. Select `SpriteAtlas` and create asset by `Create/TextMeshPro/SpriteAtlas Asset`
 
-![SpriteAtlas Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/23a6cf75-2559-484e-b8df-2a107da98a63)
+![SpriteAtlas Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/607da5ca-94fb-4a4d-a025-88032519e34d)
 
 #### 4. Done. Now you can use generated sprite asset in TextMeshPro
-
-![Asset](https://github.com/codewriter-packages/textmeshpro-spriteatlas-support/assets/26966368/a8fb3845-20f8-4f45-843a-047a0dcc8fea)
 
 ## :open_book: How to Install
 
