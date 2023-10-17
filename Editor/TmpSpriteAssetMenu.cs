@@ -22,12 +22,13 @@ namespace TMPro
 
             var rootAssetPath = GetSpriteAtlasPathFromSpriteAtlas(spriteAtlas);
 
-            var data = new TmpSpriteAssetData
-            {
-                atlasGuid = spriteAtlasGuid,
-            };
+            var data = File.Exists(rootAssetPath)
+                ? JsonUtility.FromJson<TmpSpriteAssetData>(File.ReadAllText(rootAssetPath))
+                : new TmpSpriteAssetData();
 
-            File.WriteAllText(rootAssetPath, JsonUtility.ToJson(data));
+            data.atlasGuid = spriteAtlasGuid;
+
+            File.WriteAllText(rootAssetPath, JsonUtility.ToJson(data, prettyPrint: true));
 
             AssetDatabase.ImportAsset(rootAssetPath, ImportAssetOptions.ForceUpdate);
         }

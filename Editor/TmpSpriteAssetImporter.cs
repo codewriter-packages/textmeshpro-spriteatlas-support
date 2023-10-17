@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.AssetImporters;
+using UnityEditor.U2D;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -49,11 +50,14 @@ namespace TMPro
             var spriteAtlas = AssetDatabase.LoadMainAssetAtGUID(spriteAtlasGuid) as SpriteAtlas;
             if (spriteAtlas == null)
             {
+                ctx.LogImportError("Failed to import TmpSpriteAtlasAsset: failed to load atlas");
                 return;
             }
 
             mainSpriteAsset.version = FileVersion;
             mainSpriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteAtlas.name);
+
+            SpriteAtlasUtility.PackAtlases(new[] {spriteAtlas}, ctx.selectedBuildTarget, false);
 
             TmpSpriteAssetGenerator.Generate(ctx, mainSpriteAsset, spriteAtlas, data);
 

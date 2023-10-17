@@ -1,10 +1,5 @@
 # TextMeshPro.SpriteAtlas.Support [![Github license](https://img.shields.io/github/license/codewriter-packages/textmeshpro-spriteatlas-support.svg?style=flat-square)](#) [![Unity 2022.3](https://img.shields.io/badge/Unity-2022.3+-2296F3.svg?style=flat-square)](#) ![GitHub package.json version](https://img.shields.io/github/package-json/v/codewriter-packages/textmeshpro-spriteatlas-support?style=flat-square)
 
-> [!WARNING]  
-> Package is EXPERIMENTAL and may not work.
-> 
-> Sometimes does not update automatically if the atlas contains folders as a packable asset
-
 ## :heavy_exclamation_mark: Requirements
 
 - Unity **2022.3**
