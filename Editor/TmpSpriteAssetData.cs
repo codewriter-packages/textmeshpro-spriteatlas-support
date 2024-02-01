@@ -6,6 +6,7 @@ namespace TMPro
     public class TmpSpriteAssetData
     {
         public string atlasGuid = string.Empty;
+        public string shaderGuid = string.Empty;
         public float bearingX = 0.0f;
         public float bearingY = 0.0f;
         public float advance = 0.0f;

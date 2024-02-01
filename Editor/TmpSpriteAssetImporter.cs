@@ -19,7 +19,8 @@ namespace TMPro
         {
             var data = JsonUtility.FromJson<TmpSpriteAssetData>(File.ReadAllText(path));
             var spriteAtlasPath = AssetDatabase.GUIDToAssetPath(data.atlasGuid);
-            return new[] {spriteAtlasPath};
+            var shaderPath = AssetDatabase.GUIDToAssetPath(data.shaderGuid);
+            return new[] {spriteAtlasPath, shaderPath};
         }
 
         public override void OnImportAsset(AssetImportContext ctx)
@@ -47,10 +48,23 @@ namespace TMPro
                 return;
             }
 
+            if (!GUID.TryParse(data.shaderGuid, out var shaderGuid))
+            {
+                ctx.LogImportError("Failed to import TmpSpriteAtlasAsset: shader guid is invalid");
+                return;
+            }
+
             var spriteAtlas = AssetDatabase.LoadMainAssetAtGUID(spriteAtlasGuid) as SpriteAtlas;
             if (spriteAtlas == null)
             {
                 ctx.LogImportError("Failed to import TmpSpriteAtlasAsset: failed to load atlas");
+                return;
+            }
+
+            var shader = AssetDatabase.LoadMainAssetAtGUID(shaderGuid) as Shader;
+            if (shader == null)
+            {
+                ctx.LogImportError("Failed to import TmpSpriteAtlasAsset: failed to load shader");
                 return;
             }
 
@@ -59,7 +73,7 @@ namespace TMPro
 
             SpriteAtlasUtility.PackAtlases(new[] {spriteAtlas}, ctx.selectedBuildTarget, false);
 
-            TmpSpriteAssetGenerator.Generate(ctx, mainSpriteAsset, spriteAtlas, data);
+            TmpSpriteAssetGenerator.Generate(ctx, mainSpriteAsset, spriteAtlas, shader, data);
 
             mainSpriteAsset.SortGlyphTable();
             mainSpriteAsset.UpdateLookupTables();

@@ -12,7 +12,7 @@ namespace TMPro
     public static class TmpSpriteAssetGenerator
     {
         public static void Generate(AssetImportContext ctx,
-            TMP_SpriteAsset mainSpriteAsset, SpriteAtlas atlas, TmpSpriteAssetData data)
+            TMP_SpriteAsset mainSpriteAsset, SpriteAtlas atlas, Shader shader, TmpSpriteAssetData data)
         {
             var spriteAtlasPath = AssetDatabase.GetAssetPath(atlas);
 
@@ -44,7 +44,7 @@ namespace TMPro
 
                 if (spriteAsset.material == null)
                 {
-                    AddDefaultMaterial(ctx, spriteAsset);
+                    AddDefaultMaterial(ctx, spriteAsset, shader);
                 }
 
                 mainSpriteAsset.fallbackSpriteAssets.Add(spriteAsset);
@@ -142,10 +142,9 @@ namespace TMPro
             }
         }
 
-        private static void AddDefaultMaterial(AssetImportContext ctx, TMP_SpriteAsset spriteAsset)
+        private static void AddDefaultMaterial(AssetImportContext ctx, TMP_SpriteAsset spriteAsset, Shader shader)
         {
             var name = $"{spriteAsset.spriteSheet.name} Material";
-            var shader = Shader.Find("TextMeshPro/Sprite");
             var material = new Material(shader);
             material.SetTexture(ShaderUtilities.ID_MainTex, spriteAsset.spriteSheet);
 

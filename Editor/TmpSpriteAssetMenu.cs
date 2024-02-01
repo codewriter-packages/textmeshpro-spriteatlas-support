@@ -20,6 +20,10 @@ namespace TMPro
             var spriteAtlasPath = AssetDatabase.GetAssetPath(spriteAtlas);
             var spriteAtlasGuid = AssetDatabase.AssetPathToGUID(spriteAtlasPath);
 
+            var shader = Shader.Find("TextMeshPro/Sprite");
+            var shaderPath = AssetDatabase.GetAssetPath(shader);
+            var shaderGuid = AssetDatabase.AssetPathToGUID(shaderPath);
+
             var rootAssetPath = GetSpriteAtlasPathFromSpriteAtlas(spriteAtlas);
 
             var data = File.Exists(rootAssetPath)
@@ -27,6 +31,7 @@ namespace TMPro
                 : new TmpSpriteAssetData();
 
             data.atlasGuid = spriteAtlasGuid;
+            data.shaderGuid = shaderGuid;
 
             File.WriteAllText(rootAssetPath, JsonUtility.ToJson(data, prettyPrint: true));
 
