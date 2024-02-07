@@ -7,6 +7,8 @@ namespace TMPro
     {
         public string atlasGuid = string.Empty;
         public string shaderGuid = string.Empty;
+        public float referenceWidth = 0.0f;
+        public float referenceHeight = 0.0f;
         public float bearingX = 0.0f;
         public float bearingY = 0.0f;
         public float advance = 0.0f;

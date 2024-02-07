@@ -116,15 +116,20 @@ namespace TMPro
                     height: (boundMax.y - boundMin.y) * spriteTex.height
                 );
 
+                var referenceScale = new Vector2(
+                    x: data.referenceWidth > 0f ? textureRect.width / data.referenceWidth : 1f,
+                    y: data.referenceHeight > 0f ? textureRect.height / data.referenceHeight : 1f
+                );
+
                 var spriteGlyph = new TMP_SpriteGlyph
                 {
                     index = (uint) i,
                     metrics = new GlyphMetrics(
                         width: textureRect.width,
                         height: textureRect.height,
-                        bearingX: data.bearingX,
-                        bearingY: textureRect.height - data.bearingY,
-                        advance: textureRect.width + data.advance),
+                        bearingX: data.bearingX * referenceScale.x,
+                        bearingY: textureRect.height - data.bearingY * referenceScale.y,
+                        advance: textureRect.width + data.advance * referenceScale.x),
                     glyphRect = new GlyphRect(textureRect),
                     scale = 1.0f,
                     sprite = spriteAccess,
